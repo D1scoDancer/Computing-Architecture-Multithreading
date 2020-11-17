@@ -4,7 +4,6 @@
 #include <deque>
 #include <string>
 #include <pthread.h>
-#include <stdio.h>
 
 using namespace std;
 
@@ -74,6 +73,7 @@ bool decypher(Task task, string& result) {
 				result += "i";
 				break;
 			}
+			break;
 		case 49:
 			switch (task.cypher[i + 1]) {
 			case 48:
@@ -107,6 +107,7 @@ bool decypher(Task task, string& result) {
 				result += "s";
 				break;
 			}
+			break;
 		case 50:
 			switch (task.cypher[i + 1]) {
 			case 48:
@@ -131,6 +132,7 @@ bool decypher(Task task, string& result) {
 				result += "z";
 				break;
 			}
+			break;
 		default:
 			break;
 		}
@@ -144,7 +146,7 @@ int cypher_size;
 deque<Task> bag; // портфель
 int threadNumber;
 pthread_mutex_t mutex;
-string result;
+string res;
 
 
 Task getTask() {   // допуск к портфелю
@@ -175,7 +177,7 @@ void* worker(void* param) {  // работа с портфелем
 			bag.push_front(current);
 		}
 		else {
-			result += line;
+			res += line;
 		}
 	}
 	return nullptr;
@@ -185,8 +187,7 @@ int main(int argc, char* argv[]) { //длина зашифрованного с�
 	cypher_size = stoi(argv[1]);
 	threadNumber = stoi(argv[2]);
 	string cypher = generateCypher(cypher_size);
-	string answer;
-	decypher(Task(cypher, cypher_size), answer);
+	cout << "Generated cypher: " << cypher << endl;
 
 	for (int i = 0; i < cypher_size; i += 2) { // создание портфеля задач
 		string s = cypher.substr(i, 2);
@@ -204,6 +205,6 @@ int main(int argc, char* argv[]) { //длина зашифрованного с�
 		pthread_join(threads[i], NULL);
 	}
 
-	cout << result << endl;
+	cout << "The real message: " << res << endl;
 	return 0;
 }
