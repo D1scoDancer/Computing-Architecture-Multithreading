@@ -1,217 +1,209 @@
 ﻿#define HAVE_STRUCT_TIMESPEC
 
 #include <iostream>
-#include <queue>
+#include <deque>
 #include <string>
 #include <pthread.h>
-#include <ctime>
-
+#include <stdio.h>
 
 using namespace std;
-
-// Генератор шифра
-void RndString(char* A, int size) {
-	for (int i = 0; i < size; i += 2) {
-		switch (rand() % 3)
-		{
-		case 0:
-			A[i] = 0;
-			A[i + 1] = rand() % 10;
-			break;
-		case 1:
-			A[i] = 1;
-			A[i + 1] = rand() % 10;
-		case 2:
-			A[i] = 2;
-			A[i + 1] = rand() % 6;
-			break;
-		}
-	}
-}
-
-// Вывод
-void Out(char* A, int size) {
-	for (int i = 0; i < size; i++) {
-		cout << A[i] << "   ";
-	}
-	cout << "\n";
-}
 
 struct Task {
 	string cypher;
 	int size;
-	Task(char* a, const int& _size) {
+	Task(string a, int b) {
 		cypher = a;
-		size = _size;
+		size = b;
 	}
 };
 
-bool convert(Task t, string* res) {
-	string r;
-	for (int i = 0; i < t.size; i+=2) {
-		switch (t.cypher[i])
-		{
-		case 0:
-			switch (t.cypher[i+1])
-			{
-			case 1:
-				r += 'a';
-				break;
-			case 2:
-				r += 'b';
-				break;
-			case 3:
-				r += 'c';
-				break;
-			case 4:
-				r += 'd';
-				break;
-			case 5:
-				r += 'e';
-				break;
-			case 6:
-				r += 'f';
-				break;
-			case 7:
-				r += 'g';
-				break;
-			case 8:
-				r += 'h';
-				break;
-			case 9:
-				r += 'i';
-				break;
-			default:
-				return 0;
-			}
-		case 1:
-			switch (t.cypher[i + 1])
-			{
-			case 0:
-				r += 'j';
-				break;
-			case 1:
-				r += 'k';
-				break;
-			case 2:
-				r += 'l';
-				break;
-			case 3:
-				r += 'm';
-				break;
-			case 4:
-				r += 'n';
-				break;
-			case 5:
-				r += 'o';
-				break;
-			case 6:
-				r += 'p';
-				break;
-			case 7:
-				r += 'q';
-				break;
-			case 8:
-				r += 'r';
-				break;
-			case 9:
-				r += 's';
-				break;
-			default:
-				return 0;
-			}
 
-		case 2:
-			switch (t.cypher[i + 1])
-			{
-			case 0:
-				r += 't';
+string generateCypher(int length) {
+	string result;
+
+	srand(time(NULL));
+
+	for (int i = 0; i < length; i += 2) {
+		int j = char(rand() % 3 + 0x30);
+		result += char(j);
+		if (j == 50) {
+			result += char(rand() % 7 + 0x30);
+		}
+		else {
+			result += char(rand() % 10 + 0x30);
+		}
+	}
+	return result;
+}
+
+bool decypher(Task task, string& result) {
+	if (task.size % 2 == 1) {
+		return false;
+	}
+
+	for (int i = 0; i < task.size; i += 2) {
+		switch (task.cypher[i])
+		{
+		case 48:
+			switch (task.cypher[i + 1]) {
+			case 49:
+				result += "a";
 				break;
-			case 1:
-				r += 'u';
+			case 50:
+				result += "b";
 				break;
-			case 2:
-				r += 'v';
+			case 51:
+				result += "c";
 				break;
-			case 3:
-				r += 'w';
+			case 52:
+				result += "d";
 				break;
-			case 4:
-				r += 'x';
+			case 53:
+				result += "e";
 				break;
-			case 5:
-				r += 'y';
+			case 54:
+				result += "f";
 				break;
-			case 6:
-				r += 'z';
+			case 55:
+				result += "g";
 				break;
-			default:
-				return 0;
+			case 56:
+				result += "h";
+				break;
+			case 57:
+				result += "i";
+				break;
+			}
+		case 49:
+			switch (task.cypher[i + 1]) {
+			case 48:
+				result += "j";
+				break;
+			case 49:
+				result += "k";
+				break;
+			case 50:
+				result += "l";
+				break;
+			case 51:
+				result += "m";
+				break;
+			case 52:
+				result += "n";
+				break;
+			case 53:
+				result += "o";
+				break;
+			case 54:
+				result += "p";
+				break;
+			case 55:
+				result += "q";
+				break;
+			case 56:
+				result += "r";
+				break;
+			case 57:
+				result += "s";
+				break;
+			}
+		case 50:
+			switch (task.cypher[i + 1]) {
+			case 48:
+				result += "t";
+				break;
+			case 49:
+				result += "u";
+				break;
+			case 50:
+				result += "v";
+				break;
+			case 51:
+				result += "w";
+				break;
+			case 52:
+				result += "x";
+				break;
+			case 53:
+				result += "y";
+				break;
+			case 54:
+				result += "z";
+				break;
 			}
 		default:
 			break;
 		}
 	}
-	return 1;
+	return true;
 }
 
-queue<Task> bag; // портфель
-// int size = 0;
-int idle = 0; // число простаивающий процессов
+
+int cypher_size;
+
+deque<Task> bag; // портфель
+int threadNumber;
+pthread_mutex_t mutex;
 string result;
 
-int const arrSize = 100;
-pthread_barrier_t barr; //барьер
-pthread_t mythread;  //идентификатор для дочернего потока
-pthread_mutex_t mutex; // мьютекс для синхронизации вывода;
 
-				
-void* worker(void* param) { 
-	int p = *((int*)param);
-	char Array[arrSize]; //собственный массив потока
-	RndString(Array, arrSize);   // инициализация строки шифра
-	Task t(Array, arrSize);
-	bag.push(t);
+Task getTask() {   // допуск к портфелю
+	pthread_mutex_lock(&mutex);
+	if (!bag.empty()) {
+		Task t = bag.front();
+		bag.pop_front();
+		pthread_mutex_unlock(&mutex);
+		return t;
+	}
 
+	pthread_mutex_unlock(&mutex);
+	return Task("", 0);
+}
+
+
+void* worker(void* param) {  // работа с портфелем
 	while (true) {
-		idle++;
-		if (bag.empty() && idle == p) {
+		Task current = getTask();
+		if (current.size == 0) {
 			break;
 		}
-		pthread_mutex_lock(&mutex);
-		Task current = bag.front();
-		
-		// await size > 0
-		bag.pop();// удалить задачу из портфеля
-		pthread_mutex_unlock(&mutex);// удалить задачу из портфеля
-		idle--;
 
 		string line;
-
-		if (!convert(current, &line)) {
-			bag.push(current);
+		if (!decypher(current, line)) {
+			current.cypher += "1";
+			current.size += 1;
+			bag.push_front(current);
 		}
 		else {
 			result += line;
 		}
 	}
-
 	return nullptr;
 }
 
-int main() {
-	int zero = 0;
-	int max = 4;
-	auto seed = clock();
-	srand(seed);
+int main(int argc, char* argv[]) { //длина зашифрованного сообщения > 0, количество потоков > 0
+	cypher_size = stoi(argv[1]);
+	threadNumber = stoi(argv[2]);
+	string cypher = generateCypher(cypher_size);
+	string answer;
+	decypher(Task(cypher, cypher_size), answer);
 
-	pthread_mutex_init(&mutex, nullptr);
+	for (int i = 0; i < cypher_size; i += 2) { // создание портфеля задач
+		string s = cypher.substr(i, 2);
+		Task t(s, 2);
+		bag.push_back(t);
+	}
 
-	pthread_barrier_init(&barr, nullptr, 2); //инициализация барьера со значением 2
-	pthread_create(&mythread, nullptr, worker, (void*)&zero); //создание дочернего потока
-	worker((void*)&max);
+	pthread_mutex_init(&mutex, NULL);
+	pthread_t* threads = new pthread_t[threadNumber - 1];
+	for (int i = 0; i < threadNumber - 1; i++) {
+		pthread_create(&threads[i], NULL, worker, (void*)(i + 1));
+	}
+	worker((void*)0);
+	for (int i = 0; i < threadNumber - 1; i++) {
+		pthread_join(threads[i], NULL);
+	}
 
-	pthread_join(mythread, nullptr);
-	cout << result;
+	cout << result << endl;
 	return 0;
 }
