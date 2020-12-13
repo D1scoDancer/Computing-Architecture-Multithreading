@@ -66,12 +66,12 @@ void* Barman(void* param) {
 }
 
 void* Smoker(void* param) {
-	srand(time(NULL) * _getpid());
 	int num = *((int*)param);
 	while (!isOver) {
 		sem_wait(&sem_smoke);
 		if (table.size() > 0) {
 			if (find(table.begin(), table.end(), num) == table.end()) {
+				srand(time(NULL) * _getpid());
 				int sleepTime = rand() % 2000 + 1000;
 				cout << "[" << (clock() - start) / 1000.0 << "] Smoker " << num << " will be smoking for " << sleepTime/1000.0 << endl;
 				this_thread::sleep_for(chrono::milliseconds(sleepTime));
